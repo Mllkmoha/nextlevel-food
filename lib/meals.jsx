@@ -1,25 +1,46 @@
 import { getSupabase } from "./supabase";
-
-import sql from "better-sqlite3";
 import slugify from "slugify";
 import xss from "xss";
-
-const db = sql("meals.db");
 
 export async function getMeals() {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  // throw new Error("Failed to fetch meals");
-  return db.prepare("SELECT * FROM meals").all();
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase
+    .from("meals")
+    .select("*");
+
+  if (error) {
+    throw new Error(`Failed to fetch meals: ${error.message}`);
+  }
+
+  return data;
 }
 
-export function getMeal(slug) {
-  // throw new Error("Failed to fetch meal");
-  return db.prepare("SELECT * FROM meals WHERE slug = ?").get(slug);
+export async function getMeal(slug) {
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase
+    .from("meals")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      return undefined;
+    }
+
+    throw new Error(`Failed to fetch meal: ${error.message}`);
+  }
+
+  return data;
 }
 
 export async function saveMeal(meal) {
   const supabase = getSupabase();
+
   meal.slug = slugify(meal.title, { lower: true });
   meal.instructions = xss(meal.instructions);
 
@@ -28,41 +49,36 @@ export async function saveMeal(meal) {
 
   const bufferedImage = await meal.image.arrayBuffer();
 
-  const { error } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("meals-images")
     .upload(fileName, bufferedImage, {
       contentType: meal.image.type,
       upsert: false,
     });
 
-  if (error) {
-    throw new Error(`Saving image failed: ${error.message}`);
+  if (uploadError) {
+    throw new Error(`Saving image failed: ${uploadError.message}`);
   }
 
-  const { data } = supabase.storage.from("meals-images").getPublicUrl(fileName);
+  const { data: publicUrlData } = supabase.storage
+    .from("meals-images")
+    .getPublicUrl(fileName);
 
-  meal.image = data.publicUrl;
+  meal.image = publicUrlData.publicUrl;
 
-  db.prepare(
-    `
-      INSERT INTO meals (
-        title,
-        slug,
-        image,
-        summary,
-        instructions,
-        creator,
-        creator_email
-      )
-      VALUES (
-        @title,
-        @slug,
-        @image,
-        @summary,
-        @instructions,
-        @creator,
-        @creator_email
-      )
-    `,
-  ).run(meal);
+  const { error: insertError } = await supabase
+    .from("meals")
+    .insert({
+      title: meal.title,
+      slug: meal.slug,
+      image: meal.image,
+      summary: meal.summary,
+      instructions: meal.instructions,
+      creator: meal.creator,
+      creator_email: meal.creator_email,
+    });
+
+  if (insertError) {
+    throw new Error(`Saving meal failed: ${insertError.message}`);
+  }
 }
