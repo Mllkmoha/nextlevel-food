@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 
 import sql from "better-sqlite3";
 import slugify from "slugify";
@@ -19,6 +19,7 @@ export function getMeal(slug) {
 }
 
 export async function saveMeal(meal) {
+  const supabase = getSupabase();
   meal.slug = slugify(meal.title, { lower: true });
   meal.instructions = xss(meal.instructions);
 

@@ -44,6 +44,25 @@
   box-shadow: var(--shadow-md);
 }
 
+@media (max-width: 360px) {
+  .cta {
+    width: 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .primaryBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 1rem;
+    text-align: center;
+    line-height: 1.25;
+  }
+}
+
 .primaryBtn:hover {
   background-color: var(--color-primary-dark, #B45309);
   transform: translateY(-2px);
