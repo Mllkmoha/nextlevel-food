@@ -2,20 +2,20 @@
 
 import { redirect } from "next/navigation";
 import { saveMeal } from "./meals.jsx";
-import { revalidatePath } from "next/cache.js";
+import { revalidatePath } from "next/cache";
 
 function isInvalidText(text) {
-  return !text || text.trim() === "";
+  return typeof text !== "string" || text.trim() === "";
 }
 
-export async function shareMeal(prevState,formData) {
+export async function shareMeal(prevState, formData) {
   const meal = {
-    title: formData.get("title"),
-    summary: formData.get("summary"),
-    instructions: formData.get("instructions"),
+    title: formData.get("title")?.trim(),
+    summary: formData.get("summary")?.trim(),
+    instructions: formData.get("instructions")?.trim(),
     image: formData.get("image"),
-    creator: formData.get("name"),
-    creator_email: formData.get("email"),
+    creator: formData.get("name")?.trim(),
+    creator_email: formData.get("email")?.trim(),
   };
 
   if (
@@ -26,12 +26,20 @@ export async function shareMeal(prevState,formData) {
     isInvalidText(meal.creator_email) ||
     !meal.creator_email.includes("@") ||
     !meal.image ||
-    meal.image.size === 0
+    meal.image.size === 0 ||
+    !["image/jpeg", "image/png", "image/webp"].includes(meal.image.type) ||
+    meal.image.size > 5 * 1024 * 1024
   ) {
-    return { message: "Invalid input. Please check your data." };
+    return { message: "Please complete all fields and upload a JPEG, PNG, or WebP image smaller than 5 MB." };
   }
 
-  await saveMeal(meal);
-  revalidatePath("/meals",);
+  try {
+    await saveMeal(meal);
+  } catch (error) {
+    console.error("Failed to save meal:", error);
+    return { message: "We could not save your meal. Please try again." };
+  }
+
+  revalidatePath("/meals");
   redirect("/meals");
 }

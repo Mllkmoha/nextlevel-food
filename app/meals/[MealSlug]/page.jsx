@@ -4,9 +4,11 @@ import { notFound } from "next/navigation";
 import { getMeal } from "@/lib/meals";
 import classes from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { MealSlug } = await params;
-  const meal = getMeal(MealSlug);
+  const meal = await getMeal(MealSlug);
   if (!meal) {
     return notFound();
   }
@@ -19,13 +21,11 @@ export async function generateMetadata({ params }) {
 
 export default async function MealDetailPage({ params }) {
   const { MealSlug } = await params;
-  const meal = getMeal(MealSlug);
+  const meal = await getMeal(MealSlug);
 
   if (!meal) {
     return notFound();
   }
-
-  meal.instructions = meal.instructions.replace(/\n/g, "<br />");
 
   return (
     <>
@@ -46,10 +46,7 @@ export default async function MealDetailPage({ params }) {
         <main className={classes.main}>
           <div className={classes.contentWrapper}>
             <h2 className={classes.sectionTitle}>Instructions</h2>
-            <p
-              className={classes.instructions}
-              dangerouslySetInnerHTML={{ __html: meal.instructions }}
-            ></p>
+            <p className={classes.instructions}>{meal.instructions}</p>
           </div>
         </main>
       </div>

@@ -84,6 +84,7 @@
 .instructions {
   font-size: var(--text-body);
   line-height: 1.8;
+  white-space: pre-line;
   color: var(--color-text-primary);
   background-color: var(--color-bg-secondary);
   padding: var(--space-lg);

@@ -147,11 +147,32 @@ npm run dev
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+```
+
+Use the exact filename `.env.local`; `env.local` is not loaded by Next.js. Add the
+same two variables in the Vercel project settings for Preview and Production.
+Never use or expose a Supabase service-role key in this application.
+
+### Supabase Setup
+The application expects a public `meals-images` Storage bucket and a `public.meals`
+table with the columns `id`, `slug`, `title`, `image`, `summary`, `instructions`,
+`creator`, and `creator_email`. The table and RLS policies are documented in
+[`supabase/schema.sql`](supabase/schema.sql). Run it only after checking whether
+the table or policies already exist, then create the bucket as public in the
+Supabase dashboard.
+
+The current application intentionally permits anonymous meal submissions. For a
+public production deployment, add authentication and rate limiting before
+opening the insert/upload policies broadly.
 ```
 
 ---
+
+# Validate the production bundle and lint
+npm run build
+npm run lint
 
 ## Deployment
 

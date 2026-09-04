@@ -1,10 +1,15 @@
 import { getSupabase } from "./supabase";
+import { randomUUID } from "node:crypto";
 import slugify from "slugify";
-import xss from "xss";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const IMAGE_TYPES = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 export async function getMeals() {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
   const supabase = getSupabase();
 
   const { data, error } = await supabase
@@ -40,14 +45,24 @@ export async function getMeal(slug) {
 
 export async function saveMeal(meal) {
   const supabase = getSupabase();
+  const imageExtension = IMAGE_TYPES[meal.image?.type];
 
-  meal.slug = slugify(meal.title, { lower: true });
-  meal.instructions = xss(meal.instructions);
+  if (!imageExtension || meal.image.size === 0) {
+    throw new Error("Please upload a JPEG, PNG, or WebP image.");
+  }
 
-  const extension = meal.image.name.split(".").pop();
-  const fileName = `${meal.slug}.${extension}`;
+  if (meal.image.size > MAX_IMAGE_SIZE) {
+    throw new Error("Please upload an image smaller than 5 MB.");
+  }
 
-  const bufferedImage = await meal.image.arrayBuffer();
+  const slug = slugify(meal.title, { lower: true, strict: true });
+  if (!slug) {
+    throw new Error("Please provide a meal title containing letters or numbers.");
+  }
+
+  const fileName = `${slug}-${randomUUID()}.${imageExtension}`;
+
+  const bufferedImage = Buffer.from(await meal.image.arrayBuffer());
 
   const { error: uploadError } = await supabase.storage
     .from("meals-images")
@@ -64,14 +79,14 @@ export async function saveMeal(meal) {
     .from("meals-images")
     .getPublicUrl(fileName);
 
-  meal.image = publicUrlData.publicUrl;
+  const imageUrl = publicUrlData.publicUrl;
 
   const { error: insertError } = await supabase
     .from("meals")
     .insert({
       title: meal.title,
-      slug: meal.slug,
-      image: meal.image,
+      slug,
+      image: imageUrl,
       summary: meal.summary,
       instructions: meal.instructions,
       creator: meal.creator,
@@ -79,6 +94,7 @@ export async function saveMeal(meal) {
     });
 
   if (insertError) {
+    await supabase.storage.from("meals-images").remove([fileName]);
     throw new Error(`Saving meal failed: ${insertError.message}`);
   }
 }

@@ -5,6 +5,8 @@ import classes from "./page.module.css";
 import MealsGrid from "@/components/meals/meals-grid";
 import { getMeals } from "@/lib/meals";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "All Meals",
   description: "Browse the delicious meals shared by our community.",
