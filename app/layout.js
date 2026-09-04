@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/next";
+
 import MainHeader from "@/components/main-header/main-Header";
 import "./globals.css";
 
@@ -12,6 +14,7 @@ export default function RootLayout({ children }) {
       <body>
         <MainHeader />
         {children}
+        <Analytics />
       </body>
     </html>
   );
