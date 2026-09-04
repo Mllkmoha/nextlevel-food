@@ -18,7 +18,8 @@
 ## Project Preview
 
 <div align="center">
-  <p><i>Project screenshots coming soon.</i></p>
+  <p><i><img width="2846" height="1490" alt="image" src="https://github.com/user-attachments/assets/e67e9519-25a5-4227-a4a1-04c12a1ee9da" />
+</i></p>
 </div>
 
 ---
