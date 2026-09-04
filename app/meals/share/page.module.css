@@ -150,3 +150,9 @@
     padding: var(--space-lg);
   }
 }
+
+@media (max-width: 480px) {
+  .formWrapper {
+    padding: var(--space-md);
+  }
+}

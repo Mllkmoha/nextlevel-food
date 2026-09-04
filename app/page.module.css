@@ -49,6 +49,8 @@
   display: flex;
   gap: 1rem;
   margin-top: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .primaryBtn {

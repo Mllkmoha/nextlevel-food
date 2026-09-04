@@ -106,4 +106,8 @@
   .perksGrid {
     grid-template-columns: 1fr;
   }
+
+  .perkCard {
+    padding: var(--space-md);
+  }
 }
