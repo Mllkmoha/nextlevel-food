@@ -1,0 +1,36 @@
+.link {
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  position: relative;
+  padding: 0.25rem 0;
+  transition: var(--transition-fast);
+}
+
+.link:hover {
+  color: var(--color-text-primary);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  transition: var(--transition-normal);
+}
+
+.link:hover::after {
+  width: 100%;
+}
+
+.active {
+  color: var(--color-accent) !important;
+}
+
+.active::after {
+  width: 100%;
+}

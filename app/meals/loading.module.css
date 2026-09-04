@@ -1,0 +1,17 @@
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+    animation: loading 1.2s ease-in-out infinite;
+  }
+  
+  @keyframes loading {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+  
+    50% {
+      opacity: 1;
+    }
+  }
